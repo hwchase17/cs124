@@ -55,10 +55,30 @@ int main(int argc, char *argv[] )
         }
     }
     // Matrix multiplication
+    for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_a[i][j]);
+        }
+        printf("\n");
+    }
+    for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_b[i][j]);
+        }
+        printf("\n");
+    }
+    // Matrix multiplication
     int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
+    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
     for (i = 0; i < act_dim; i++) {
         for (j = 0; j < act_dim; j++) {
             printf("%d ", mat_c[i][j]);
+        }
+        printf("\n");
+    }
+    for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_d[i][j]);
         }
         printf("\n");
     }
@@ -75,7 +95,7 @@ int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, in
         for(j =0;j < dim; j++){
             sum = 0;
             for(k =0;k < dim; k++){
-                sum += mat_a[row_a+i][col_a+k]* mat_b[row_a+k][col_a+j];
+                sum += mat_a[row_a+i][col_a+k]* mat_b[row_b+k][col_b+j];
             }
             mat_c[i][j] = sum;
         }
@@ -87,10 +107,10 @@ int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int
     for ( int i = 0; i < dim; i++ ) {
         mat_c[i] = (int*)malloc(dim*sizeof(int));
     }
-    int i,j,sum;
+    int i,j;
     for (i = 0; i < dim; i++){
         for(j =0;j < dim; j++){
-            mat_c[i][j] = mat_a[row_a+i][col_a+j]+ sub* mat_b[row_a+i][col_a+j];
+            mat_c[i][j] = mat_a[row_a+i][col_a+j]+ sub* mat_b[row_b+i][col_b+j];
         }
     }
     return mat_c;
@@ -131,7 +151,7 @@ int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, i
         for ( int i = 0; i < dim; i++ ) {
             mat_c[i] = (int*)malloc(dim*sizeof(int));
         }
-        int i,j,sum;
+        int i,j;
         for (i = 0; i < n; i++){
             for(j =0;j < n; j++){
                 mat_c[i][j] = q1[i][j];
@@ -155,20 +175,6 @@ int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, i
         return mat_c;
         
     }
-    int **mat_c = (int**)malloc(dim*sizeof(int*));
-    for ( int i = 0; i < dim; i++ ) {
-        mat_c[i] = (int*)malloc(dim*sizeof(int));
-    }
-    int i,j,k,sum;
-    for (i = 0; i < dim; i++){
-        for(j =0;j < dim; j++){
-            sum = 0;
-            for(k =0;k < dim; k++){
-                sum += mat_a[row_a+i][col_a+k]* mat_b[row_a+k][col_a+j];
-            }
-            mat_c[i][j] = sum;
-        }
-    }
-    return mat_c;
 }
+
 
