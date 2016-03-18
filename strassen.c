@@ -1,6 +1,6 @@
 //
-//  strassen.c
-//  
+//  strass.c
+//
 //
 //  Created by Harrison Chase on 3/16/16.
 //
@@ -11,203 +11,165 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-typedef struct{
-    int nrow,ncol;
-    int **mat;
-}matrix;
 
 
-matrix matrix_mult(matrix a,matrix b);
+int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
+int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
+int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim,int sub);
 int main(int argc, char *argv[] )
 {
     srand(time(NULL));
+    int dim = atoi(argv[1]);
+    //read file into array
+    int i,j;
+    int act_dim = pow(2,ceil(log(dim)/log(2)));
+    // Initialize the matrixes
+    int **mat_a = (int**)malloc(act_dim*sizeof(int*));
+    for ( int i = 0; i < act_dim; i++ ) {
+        mat_a[i] = (int*)malloc(act_dim*sizeof(int));
+    }
+    int **mat_b = (int**)malloc(act_dim*sizeof(int*));
+    for ( int i = 0; i < act_dim; i++ ) {
+        mat_b[i] = (int*)malloc(act_dim*sizeof(int));
+    }
+    // Read in the matrices
+    for (i = 0; i < act_dim; i++){
+        for(j =0;j < act_dim; j++){
+            mat_a[i][j] = rand() % 2;
+            mat_b[i][j] = rand() % 2;
+        }
+    }
+    /*for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_a[i][j]);
+        }
+        printf("\n");
+    }
+    for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_b[i][j]);
+        }
+        printf("\n");
+    }*/
+    // Matrix multiplication
+    clock_t begin, end;
+    double time_spent;
     
-    int n = atoi(argv[1]);
-    //http://stackoverflow.com/questions/455960/dynamic-allocating-array-of-arrays-in-c
-    matrix mat_a;
-    mat_a.ncol=n;
-    mat_a.nrow=n;
-    mat_a.mat = (int**)malloc(n*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mat_a.mat[i] = (int*)malloc(n*sizeof(int));
-    }
-    matrix mat_b;
-    mat_b.ncol=n;
-    mat_b.nrow=n;
-    mat_b.mat = (int**)malloc(n*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mat_b.mat[i] = (int*)malloc(n*sizeof(int));
-    }
-    /*int** second = (int**)malloc(n*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        second[i] = (int*)malloc(n*sizeof(int));
-    }
-    int** mult = (int**)malloc(n*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult[i] = (int*)malloc(n*sizeof(int));
-    }*/
-    //int first[n][n];
-    //int second[n][n];
-    //int mult[n][n];
-    int c,d,e,sum;
-    for (c =0;c<n;c++){
-        for(d=0;d<n;d++){
-            mat_a.mat[c][d] = rand() % 2;
-            mat_b.mat[c][d] = rand() % 2;
-        }
-    }
-    /*for (c =0;c<n;c++){
-        for(d=0;d<n;d++){
-            sum = 0;
-            for(e=0;e<n;e++){
-                sum+=first[c][e]*second[e][d];
+    begin = clock();
+    int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Strassen took: %f\n",time_spent);
+    begin = clock();
+    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Regular took: %f\n",time_spent);
+    for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            if(mat_c[i][j]!=mat_d[i][j]){
+                printf("hi");
+                printf("\n");
             }
-            mult[c][d]=sum;
         }
+    }
+    /*for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_d[i][j]);
+        }
+        printf("\n");
     }*/
-    matrix mult = matrix_mult(mat_a,mat_b);
-    for (c = 0; c < n; c++) {
-        for (d = 0; d < n; d++) {
-            printf("%d ", mat_a.mat[c][d]);
-        }
-        printf("\n");
-    }
-    for (c = 0; c < n; c++) {
-        for (d = 0; d < n; d++) {
-            printf("%d ", mat_b.mat[c][d]);
-        }
-        printf("\n");
-    }
-    for (c = 0; c < n; c++) {
-        for (d = 0; d < n; d++) {
-            printf("%d ", mult.mat[c][d]);
-        }
-        printf("\n");
-    }
-}
-matrix matrix_mult(matrix a,matrix b){
-    int c,d,e,n,sum;
-    n = a.nrow;
-    matrix mult;
-    mult.nrow = a.nrow;
-    mult.ncol = b.ncol;
-    mult.mat = (int**)malloc(b.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult.mat[i] = (int*)malloc(a.ncol*sizeof(int));
-    }
-    for (c =0;c<a.nrow;c++){
-        for(d=0;d<b.ncol;d++){
-            sum = 0;
-            for(e=0;e<a.ncol;e++){
-                sum+=a.mat[c][e]*b.mat[e][d];
-            }
-            mult.mat[c][d]=sum;
-        }
-    }
-    return mult;
-}
-matrix matrix_add(matrix a,matrix b){
-    int c,d;
-    matrix add;
-    add.nrow = a.nrow;
-    add.ncol = b.ncol;
-    add.mat = (int**)malloc(b.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        add.mat[i] = (int*)malloc(a.ncol*sizeof(int));
-    }
-    for (c =0;c<a.nrow;c++){
-        for(d=0;d<b.ncol;d++){
-            add.mat[c][d]=a.mat[c][d] + b.mat[c][d];
-        }
-    }
-    return add;
+    
 }
 
-matrix make1(matrix a){
-    matrix A;
-    int n =log(a.nrow)/log(2)
-    A.ncol = pow(2,n);
-    A.nrow = A.ncol;
-    A.mat = (int**)malloc(A.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult.mat[i] = (int*)malloc(A.ncol*sizeof(int));
+int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim){
+    int **mat_c = (int**)malloc(dim*sizeof(int*));
+    for ( int i = 0; i < dim; i++ ) {
+        mat_c[i] = (int*)malloc(dim*sizeof(int));
     }
-    int c,d;
-    for (c =0;c<A.nrow;c++){
-        for(d=0;d<A.ncol;d++){
-            A.mat[c][d] = a.mat[c][d];
+    int i,j,k,sum;
+    for (i = 0; i < dim; i++){
+        for(j =0;j < dim; j++){
+            sum = 0;
+            for(k =0;k < dim; k++){
+                sum += mat_a[row_a+i][col_a+k]* mat_b[row_b+k][col_b+j];
+            }
+            mat_c[i][j] = sum;
         }
     }
-    return A;
-    
+    return mat_c;
 }
-matrix make2(matrix a){
-    matrix A;
-    int n = pow(2,log(a.nrow)/log(2))
-    A.ncol = a.nrow - n;
-    A.nrow = n;
-    A.mat = (int**)malloc(A.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult.mat[i] = (int*)malloc(A.ncol*sizeof(int));
+int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim,int sub){
+    int **mat_c = (int**)malloc(dim*sizeof(int*));
+    for ( int i = 0; i < dim; i++ ) {
+        mat_c[i] = (int*)malloc(dim*sizeof(int));
     }
-    int c,d;
-    for (c =0;c<A.nrow;c++){
-        for(d=0;d<A.ncol;d++){
-            A.mat[c][d] = a.mat[c][n+d];
+    int i,j;
+    for (i = 0; i < dim; i++){
+        for(j =0;j < dim; j++){
+            mat_c[i][j] = mat_a[row_a+i][col_a+j]+ sub* mat_b[row_b+i][col_b+j];
         }
     }
-    return A;
-    
+    return mat_c;
 }
-matrix make3(matrix a){
-    matrix A;
-    int n = pow(2,log(a.nrow)/log(2))
-    A.ncol = n;
-    A.nrow = a.ncol - n;
-    A.mat = (int**)malloc(A.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult.mat[i] = (int*)malloc(A.ncol*sizeof(int));
+
+int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim){
+    if (dim <=1){
+        return regular_mult(mat_a,mat_b,row_a,col_a,row_b,col_b, dim);
     }
-    int c,d;
-    for (c =0;c<A.nrow;c++){
-        for(d=0;d<A.ncol;d++){
-            A.mat[c][d] = a.mat[n+c][d];
+    else{
+        int n = dim/2;
+        int** p1= regular_add(mat_b,mat_b,row_b,col_b+n,row_b+n,col_b+n,n,-1);
+        p1 = strassen_mult(mat_a,p1,row_a,col_a,0,0,n);
+        int** p2 = regular_add(mat_a,mat_a,row_a,col_a,row_a,col_a+n,n,1);
+        p2 = strassen_mult(p2,mat_b,0,0,row_b+n,col_b+n,n);
+        int** p3 = regular_add(mat_a,mat_a,row_a+n,col_a,row_a+n,col_a+n,n,1);
+        p3 = strassen_mult(p3,mat_b,0,0,row_b,col_b,n);
+        int** p4= regular_add(mat_b,mat_b,row_b+n,col_b,row_b,col_b,n,-1);
+        p4 = strassen_mult(mat_a,p4,row_a+n,col_a+n,0,0,n);
+        int** p5a= regular_add(mat_a,mat_a,row_a,col_a,row_a+n,col_a+n,n,1);
+        int** p5b= regular_add(mat_b,mat_b,row_b,col_b,row_b+n,col_b+n,n,1);
+        int** p5 = strassen_mult(p5a,p5b,0,0,0,0,n);
+        int** p6a= regular_add(mat_a,mat_a,row_a,col_a+n,row_a+n,col_a+n,n,-1);
+        int** p6b= regular_add(mat_b,mat_b,row_b+n,col_b,row_b+n,col_b+n,n,1);
+        int** p6 = strassen_mult(p6a,p6b,0,0,0,0,n);
+        int** p7a= regular_add(mat_a,mat_a,row_a,col_a,row_a+n,col_a,n,-1);
+        int** p7b= regular_add(mat_b,mat_b,row_b,col_b,row_b,col_b+n,n,1);
+        int** p7 = strassen_mult(p7a,p7b,0,0,0,0,n);
+        int** q1 = regular_add(p5,p4,0,0,0,0,n,1);
+        q1 = regular_add(q1,p2,0,0,0,0,n,-1);
+        q1 = regular_add(q1,p6,0,0,0,0,n,1);
+        int** q2 = regular_add(p1,p2,0,0,0,0,n,1);
+        int** q3 = regular_add(p3,p4,0,0,0,0,n,1);
+        int** q4 = regular_add(p5,p1,0,0,0,0,n,1);
+        q4 = regular_add(q4,p3,0,0,0,0,n,-1);
+        q4 = regular_add(q4,p7,0,0,0,0,n,-1);
+        int **mat_c = (int**)malloc(dim*sizeof(int*));
+        for ( int i = 0; i < dim; i++ ) {
+            mat_c[i] = (int*)malloc(dim*sizeof(int));
         }
-    }
-    return A;
-    
-}
-matrix make4(matrix a){
-    matrix A;
-    int n = pow(2,log(a.nrow)/log(2))
-    A.ncol = a.nrow - n;
-    A.nrow = a.ncol - n;
-    A.mat = (int**)malloc(A.nrow*sizeof(int*));
-    for ( int i = 0; i < n; i++ ) {
-        mult.mat[i] = (int*)malloc(A.ncol*sizeof(int));
-    }
-    int c,d;
-    for (c =0;c<A.nrow;c++){
-        for(d=0;d<A.ncol;d++){
-            A.mat[c][d] = a.mat[n+c][n+d];
+        int i,j;
+        for (i = 0; i < n; i++){
+            for(j =0;j < n; j++){
+                mat_c[i][j] = q1[i][j];
+            }
         }
+        for (i = 0; i < n; i++){
+            for(j =0;j < n; j++){
+                mat_c[i][j+n] = q2[i][j];
+            }
+        }
+        for (i = 0; i < n; i++){
+            for(j =0;j < n; j++){
+                mat_c[i+n][j] = q3[i][j];
+            }
+        }
+        for (i = 0; i < n; i++){
+            for(j =0;j < n; j++){
+                mat_c[i+n][j+n] = q4[i][j];
+            }
+        }
+        return mat_c;
+        
     }
-    return A;
-    
-}
-void matrix_mult(int n,int **first, int **second,int **mult,matrix a,matrix b){
-    if(n<=1){
-        matrix_mult(int n,int first[n][n], int second[n][n],int mult[n][n])
-    }
-    n = n/2;
-    matrix A = make1(a);
-    matrix B = make2(a);
-    matrix C = make3(a);
-    matrix D = make4(a);
-    matrix E = make1(b);
-    matrix F = make2(b);
-    matrix G = make3(b);
-    matrix H = make4(b);
-    
-    
 }
