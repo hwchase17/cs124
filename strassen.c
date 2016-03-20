@@ -12,7 +12,7 @@
 #include <time.h>
 #include <math.h>
 
-
+int break_point;
 int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim,int sub);
@@ -20,6 +20,7 @@ int main(int argc, char *argv[] )
 {
     srand(time(NULL));
     int dim = atoi(argv[1]);
+    break_point = atoi(argv[2]);
     //read file into array
     int i,j;
     int act_dim = pow(2,ceil(log(dim)/log(2)));
@@ -61,12 +62,12 @@ int main(int argc, char *argv[] )
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Strassen took: %f\n",time_spent);
     begin = clock();
-    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
+    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,dim);
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Regular took: %f\n",time_spent);
-    for (i = 0; i < act_dim; i++) {
-        for (j = 0; j < act_dim; j++) {
+    for (i = 0; i < dim; i++) {
+        for (j = 0; j < dim; j++) {
             if(mat_c[i][j]!=mat_d[i][j]){
                 printf("hi");
                 printf("\n");
@@ -114,7 +115,7 @@ int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int
 }
 
 int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim){
-    if (dim <=1){
+    if (dim <=break_point){
         return regular_mult(mat_a,mat_b,row_a,col_a,row_b,col_b, dim);
     }
     else{
