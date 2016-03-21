@@ -13,17 +13,22 @@
 #include <math.h>
 
 int break_point;
+int max_dim;
 int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim,int sub);
+int get_padding(int actual_size, int Q);
 int main(int argc, char *argv[] )
 {
     srand(time(NULL));
     int dim = atoi(argv[1]);
+    max_dim = dim;
     break_point = atoi(argv[2]);
     //read file into array
     int i,j;
-    int act_dim = pow(2,ceil(log(dim)/log(2)));
+    //int act_dim = pow(2,ceil(log(dim)/log(2)));
+    int act_dim = get_padding(dim,break_point);
+    printf("%d",act_dim);
     // Initialize the matrixes
     int **mat_a = (int**)malloc(act_dim*sizeof(int*));
     for ( int i = 0; i < act_dim; i++ ) {
@@ -62,7 +67,7 @@ int main(int argc, char *argv[] )
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Strassen took: %f\n",time_spent);
     begin = clock();
-    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,dim);
+    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     printf("Regular took: %f\n",time_spent);
@@ -75,6 +80,12 @@ int main(int argc, char *argv[] )
         }
     }
     /*for (i = 0; i < act_dim; i++) {
+        for (j = 0; j < act_dim; j++) {
+            printf("%d ", mat_c[i][j]);
+        }
+        printf("\n");
+    }
+    for (i = 0; i < act_dim; i++) {
         for (j = 0; j < act_dim; j++) {
             printf("%d ", mat_d[i][j]);
         }
@@ -92,8 +103,11 @@ int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, in
     for (i = 0; i < dim; i++){
         for(j =0;j < dim; j++){
             sum = 0;
-            for(k =0;k < dim; k++){
+            /*k = 0;
+            while((k<dim)&(row_a+i<max_dim)&(col_a+k<max_dim)){*/
+            for(k=0;k<dim;k++){
                 sum += mat_a[row_a+i][col_a+k]* mat_b[row_b+k][col_b+j];
+                //k++;
             }
             mat_c[i][j] = sum;
         }
@@ -173,4 +187,25 @@ int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, i
         return mat_c;
         
     }
+}
+int get_padding(int actual_size, int Q) {
+    int cnt = 0;
+    float n = actual_size*1.;
+    while(n > Q) {
+        cnt++;
+        n /= 2;
+    }
+    //printf("%d\n",cnt);
+    //printf("%d\n",(1<<cnt));
+    
+    // result should be smallest value such that:
+    // result >= actual_size AND
+    // result % (1<<cnt) == 0
+    
+    /*if (actual_size % (1<<cnt) == 0) {
+        return actual_size;
+    } else {
+        return actual_size + (1<<cnt) - actual_size % (1<<cnt);
+    }*/
+    return ceil(n)*(1<<cnt);
 }
