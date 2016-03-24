@@ -17,7 +17,7 @@ int max_dim;
 int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim);
 int ** regular_add(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim,int sub);
-int get_padding(int actual_size, int Q);
+int get_padding(int dim, int break_point);
 int main(int argc, char *argv[] )
 {
     srand(time(NULL));
@@ -25,14 +25,6 @@ int main(int argc, char *argv[] )
     myFile = fopen(argv[3], "r");
     int dim = atoi(argv[2]);
     int act_dim = get_padding(dim,break_point);
-    //for(int multiply = 0;multiply<=1;multiply++){
-    //double time_spent = 0.;
-    //double time_spent1 = 0.;
-    //clock_t begin, end;
-        //break_point=break_point+10;
-        //printf("%d",break_point);
-        //for(int adam =0; adam<1;adam++){
-            //read file into array
     int i,j;
     int **mat_a = (int**)malloc(act_dim*sizeof(int*));
     for ( int i = 0; i < act_dim; i++ ) {
@@ -43,12 +35,6 @@ int main(int argc, char *argv[] )
         mat_b[i] = (int*)malloc(act_dim*sizeof(int));
     }
     // Read in the matrices
-    /*for (i = 0; i < act_dim; i++){
-        for(j =0;j < act_dim; j++){
-            mat_a[i][j] = rand() % 2;
-            mat_b[i][j] = rand() % 2;
-        }
-    }*/
     for (i = 0; i < act_dim; i++){
         for(j =0;j < act_dim; j++){
             if(i<dim & j<dim){
@@ -69,118 +55,15 @@ int main(int argc, char *argv[] )
             }
         }
     }
-
-    //dim = 0;
-    //for(int adam = 0;adam<1;adam++){
-    //for(int adam = 0;adam<1;adam++){
-        //dim=dim+50;
-        //act_dim = get_padding(dim,break_point);
-        //act_dim = pow(2,ceil(log(dim)/log(2)));
-        //begin = clock();
-        //int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
-        //end = clock();
-        //time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-        //free(mat_d);
-        //begin = clock();
-        //printf("%d",act_dim);
-        //fflush(stdout);
-        int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
-        //end = clock();
-        //time_spent1 = (double)(end - begin) / CLOCKS_PER_SEC;
+    // Do the multiplication
+    int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
     for (i = 0; i < dim; i++){
         printf("%d\n",mat_c[i][i]);
     }
     printf("\n");
-        //printf("%f,",time_spent1);
-        
-    //}
-    //printf("Regular took: %f\n",time_spent);
-    /*time_spent=0.;
-    for(int adam = 0;adam<1000;adam++){
-        begin = clock();
-        int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
-        end = clock();
-        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-        free(mat_c);
-    }*/
-    //printf("Strassen took: %f\n",time_spent1);
     free(mat_a);
     free(mat_b);
     free(mat_c);
-            //int act_dim = pow(2,ceil(log(dim)/log(2)));
-        /*
-            //printf("%d",act_dim);
-            // Initialize the matrixes
-        int **mat_a = (int**)malloc(act_dim*sizeof(int*));
-        for ( int i = 0; i < act_dim; i++ ) {
-            mat_a[i] = (int*)malloc(act_dim*sizeof(int));
-        }
-        int **mat_b = (int**)malloc(act_dim*sizeof(int*));
-        for ( int i = 0; i < act_dim; i++ ) {
-            mat_b[i] = (int*)malloc(act_dim*sizeof(int));
-        }
-            // Read in the matrices
-        for (i = 0; i < act_dim; i++){
-            for(j =0;j < act_dim; j++){
-                mat_a[i][j] = rand() % 2;
-                mat_b[i][j] = rand() % 2;
-            }
-        }*/
-            /*for (i = 0; i < act_dim; i++) {
-             for (j = 0; j < act_dim; j++) {
-             printf("%d ", mat_a[i][j]);
-             }
-             printf("\n");
-             }
-             for (i = 0; i < act_dim; i++) {
-             for (j = 0; j < act_dim; j++) {
-             printf("%d ", mat_b[i][j]);
-             }
-             printf("\n");
-             }*/
-            // Matrix multiplication
-            
-            
-        /*begin = clock();
-        int ** mat_c = strassen_mult(mat_a,mat_b,0,0,0,0,act_dim);
-        end = clock();
-        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
-        //free(mat_a);
-        //free(mat_b);
-        free(mat_c);
-        //}
-    printf("Strassen took: %f\n",time_spent);
-    //}*/
-    /*for(break_point = 16;break_point<512;break_point=break_point*2){
-        
-    }*/
-    
-    /*begin = clock();
-    int ** mat_d = regular_mult(mat_a,mat_b,0,0,0,0,act_dim);
-    end = clock();
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Regular took: %f\n",time_spent);*/
-    /*for (i = 0; i < dim; i++) {
-        for (j = 0; j < dim; j++) {
-            if(mat_c[i][j]!=mat_d[i][j]){
-                printf("hi");
-                printf("\n");
-            }
-        }
-    }*/
-    /*for (i = 0; i < act_dim; i++) {
-        for (j = 0; j < act_dim; j++) {
-            printf("%d ", mat_c[i][j]);
-        }
-        printf("\n");
-    }
-    for (i = 0; i < act_dim; i++) {
-        for (j = 0; j < act_dim; j++) {
-            printf("%d ", mat_d[i][j]);
-        }
-        printf("\n");
-    }*/
-    
 }
 
 int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, int col_b, int dim){
@@ -192,11 +75,8 @@ int ** regular_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, in
     for (i = 0; i < dim; i++){
         for(j =0;j < dim; j++){
             sum = 0;
-            /*k = 0;
-            while((k<dim)&(row_a+i<max_dim)&(col_a+k<max_dim)){*/
             for(k=0;k<dim;k++){
                 sum += mat_a[row_a+i][col_a+k]* mat_b[row_b+k][col_b+j];
-                //k++;
             }
             mat_c[i][j] = sum;
         }
@@ -294,24 +174,16 @@ int ** strassen_mult(int ** mat_a,int** mat_b, int row_a, int col_a,int row_b, i
         
     }
 }
-int get_padding(int actual_size, int Q) {
-    int cnt = 0;
-    float n = actual_size*1.;
-    while(n > Q) {
-        cnt++;
-        n /= 2;
+int get_padding(int dim, int break_point) {
+    int i = 0;
+    float n = dim*1.;
+    while(n > break_point) {
+        i++;
+        n = n/2;
     }
-    //printf("%d\n",cnt);
-    //printf("%d\n",(1<<cnt));
-    
-    // result should be smallest value such that:
-    // result >= actual_size AND
-    // result % (1<<cnt) == 0
-    
-    /*if (actual_size % (1<<cnt) == 0) {
-        return actual_size;
-    } else {
-        return actual_size + (1<<cnt) - actual_size % (1<<cnt);
-    }*/
-    return ceil(n)*(1<<cnt);
+    int j = ceil(n);
+    for(int k =0; k<i; k++){
+        j = j*2;
+    }
+    return j;
 }
